@@ -1,7 +1,7 @@
 import networkx as nx
 import itertools as it
 
-class NodeGraph(object):
+class CompleteGraphTools(object):
     """ Graph is a networkx graph
     if you want completely connected graphs of a certain sizes 
     you can specify the lower and upper bounds"""
@@ -19,16 +19,20 @@ class NodeGraph(object):
 #    def get_largest_connected_component(self):
 #        raise NotImplementedError("fix this")
 
-    def get_edges(self):
+    def get_relevant_edges(self):
         """ a filter for edges
         returns an edge where the number of triangles could be a part 
-        of a completely connected graph of size "connected_nodes"
+        of a completely connected graph of size "lower_bound"
         """
-        lower_bound= self.lower_bound-2
+        if self.lower_bound<3:
+            raise AttributeError("""Lower bound needs to be >=3 nodes as this
+                can only find triangles and above""")
+        lowest_bound= self.lower_bound-2
+        should_have_x_triangles = sum(xrange(lowest_bound))
         for x,y in self.graph.edges():
-            if nx.triangles(self.graph,y)>=self.lower_bound \
-                and nx.triangles(self.graph,x)>=self.lower_bound:
-                [x,y]=sorted([y,x])
+            if nx.triangles(self.graph,y)>=should_have_x_triangles \
+                and nx.triangles(self.graph,x)>=should_have_x_triangles:
+                [x,y]=sorted([x,y])
                 yield x,y
 
     def len_node(x,node_num):
@@ -40,21 +44,20 @@ class NodeGraph(object):
             return it.chain.from_iterable(it.imap(f, items))
     
     def my_map(self):
-        output = []
-        for list_of_edges in it.combinations(self.get_edges(),self.lower_bound):
-            for x,y in list_of_edges:
-                output.append(x)
-                output.append(y)
-            
-        yield sorted(list(set(output)))        
+        output = set()
+        for list_of_edges in it.combinations(self.get_relevant_edges(),self.lower_bound):
+            for x in list_of_edges:
+                output.update(x)
+
+        yield sorted(list(output))
         del output
 
 
     def get_connected_nodes(self):
         raise NotImplementedError("fix this")
        #keep the state of the graph connections with a counter object so you cna count down the edge counts
-    #    for triad in it.combinations(get_edges(graph),connected_nodes):
-    #        it.ifilter(,it.combinations(get_edges(graph, connected_nodes)))
+    #    for triad in it.combinations(get_relevant_edges(graph),connected_nodes):
+    #        it.ifilter(,it.combinations(get_relevant_edges(graph, connected_nodes)))
     #        node_list = set([y for x in triad for y in x])
     #        if len(node_list)==connected_nodes:
     #            output[tuple(node_list)]=1
