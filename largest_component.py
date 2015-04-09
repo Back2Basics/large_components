@@ -27,12 +27,17 @@ class CompleteGraphTools(object):
         if self.lower_bound<3:
             raise AttributeError("""Lower bound needs to be >=3 nodes as this
                 can only find triangles and above""")
-        lowest_bound= self.lower_bound-2
+        lowest_bound= self.lower_bound-1
         should_have_x_triangles = sum(xrange(lowest_bound))
         for x,y in self.graph.edges():
+            print("number of triangles: ",nx.triangles(self.graph,x))
+            print("number of triangles: ", nx.triangles(self.graph,y))            
             if nx.triangles(self.graph,y)>=should_have_x_triangles \
                 and nx.triangles(self.graph,x)>=should_have_x_triangles:
-                [x,y]=sorted([x,y])
+                try:
+                    [x,y]=sorted([x,y])
+                except:
+                    pass
                 yield x,y
 
     def len_node(x,node_num):
